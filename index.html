@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SAKA — Spatially Aware Keypoint Allocation for Lightweight Image Matching.">
+  <title>SAKA — Spatially Aware Keypoint Allocation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="site-grid" aria-hidden="true"></div>
+  <header class="nav-shell">
+    <nav class="nav container" aria-label="Primary navigation">
+      <a class="wordmark" href="#top"><span>SAKA</span><small>CV · 2026</small></a>
+      <div class="nav-links">
+        <a href="#abstract">Abstract</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#bibtex">BibTeX</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero container reveal">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span> International Conference on Vision, Image and Signal Processing · 2026</div>
+        <h1>SAKA: Spatially Aware Keypoint Allocation for Lightweight Image Matching</h1>
+        <div class="author-line">Haoran Zhao · Leyan Chen · Haokai Wen · Wentao Cheng<sup>*</sup><br><span>Faculty of Science and Technology, Beijing Normal-Hong Kong Baptist University · Zhuhai, China</span></div>
+        <p class="hero-note"><strong>TL;DR</strong> A training-free replacement for global Top-K selection that treats keypoints as a spatial resource.</p>
+      </div>
+      <div class="hero-visual">
+        <figure class="hero-figure">
+          <img src="assets/keypoint-distribution.png" alt="Comparison of XFeat Top-K and SAKA keypoint distributions on the same image." loading="eager">
+          <figcaption><span class="legend-dot amber"></span> XFeat Top-K <span class="legend-dot blue"></span> SAKA <b>→</b> the same budget, distributed across the scene.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="abstract" class="section container abstract-section reveal">
+      <div class="section-kicker">Abstract</div>
+      <div class="abstract-grid">
+        <div class="abstract-copy">
+          <p>Lightweight local-feature pipelines typically enforce a fixed keypoint budget through global <span class="nowrap">Top-K</span> selection. When high responses cluster on a textured object or a narrow overlap, the selected descriptors become geometrically redundant. SAKA partitions the score or reliability map into blocks, estimates regional evidence from response magnitude and entropy, and assigns bounded quotas while preserving score order inside each block. Detector weights, descriptors, matching, and geometric verification stay unchanged.</p>
+        </div>
+        <h2>Global ranking sees <span>score.</span><br>SAKA sees <span>support.</span></h2>
+      </div>
+    </section>
+
+    <section id="method" class="section method-section">
+      <div class="container">
+        <div class="section-kicker">Method</div>
+        <div class="method-heading"><h2>A quota for every useful region.</h2><p>SAKA is an inference-time allocator. It keeps local ranking intact while controlling how much of the fixed budget any block can claim.</p></div>
+        <div class="method-layout">
+          <div class="rail" aria-label="SAKA method steps">
+            <div class="rail-line"></div>
+            <article class="step"><span class="step-node">01</span><div><h3>Read the field</h3><p>Average-pool and clip response maps so regional evidence is robust to isolated peaks.</p></div></article>
+            <article class="step"><span class="step-node">02</span><div><h3>Score the blocks</h3><p>Combine mean, top-response evidence, entropy, candidate quality, and availability.</p></div></article>
+            <article class="step"><span class="step-node">03</span><div><h3>Bound the quota</h3><p>Use lower bounds and density caps to balance coverage with reliable candidates.</p></div></article>
+            <article class="step"><span class="step-node">04</span><div><h3>Keep the best</h3><p>Select by the original detector score inside each block. Refill only when needed.</p></div></article>
+          </div>
+          <figure class="method-figure">
+            <img src="assets/pipeline.png" alt="SAKA-enhanced image-matching pipeline from input images to final correspondences" loading="lazy">
+            <figcaption>SAKA replaces only the selection operator in the matching pipeline.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="results" class="section results-section">
+      <div class="container">
+        <div class="section-kicker">Results</div>
+        <div class="results-heading"><h2>Geometry improves<br>when support <em>opens up.</em></h2><p>SAKA is most helpful when reliable responses are unevenly distributed: indoor scenes, viewpoint changes, and night-time localization.</p></div>
+        <div class="result-cards">
+          <article class="result-card featured"><span class="card-tag">MegaDepth-1500 · XFeat*</span><strong>+1.3</strong><span class="unit">AUC @ 10°</span><p>66.1 → <b>67.4</b> with the same 4,096-keypoint budget.</p><div class="bars"><i style="height:57%"></i><i style="height:73%"></i><i style="height:89%"></i><i class="hot" style="height:96%"></i></div></article>
+          <article class="result-card"><span class="card-tag">ScanNet-1500 · XFeat*</span><strong>+1.1</strong><span class="unit">AUC @ 10°</span><p>34.5 → <b>35.6</b> across 1,500 indoor pairs.</p><div class="mini-line"><span>baseline</span><span>SAKA</span><div><i style="width:69%"></i><b style="width:71%"></b></div></div></article>
+          <article class="result-card"><span class="card-tag">Aachen Night · XFeat</span><strong>+4.1</strong><span class="unit">recall @ 0.5m / 5°</span><p>86.7 → <b>90.8</b> under appearance change.</p><div class="mini-line"><span>night queries</span><span>more support</span><div><i style="width:67%"></i><b style="width:91%"></b></div></div></article>
+        </div>
+        <p class="results-footnote">Reported values follow the paper's matched baseline–SAKA protocol. Gains are geometry-oriented and can be neutral when Top-K already covers the scene.</p>
+        <div class="qualitative-block">
+          <div class="qual-heading"><h2>Coverage you can <em>see.</em></h2><p>Across outdoor viewpoint, indoor, street, and texture-heavy scenes, SAKA broadens the support of selected points and inliers.</p></div>
+          <figure class="wide-figure"><button class="zoomable" type="button" aria-label="Open qualitative comparison larger"><img src="assets/four-scenarios.png" alt="Four qualitative scenarios comparing XFeat Top-K with XFeat plus SAKA" loading="lazy"><span>click to enlarge ↗</span></button><figcaption>Top-K (left) and SAKA (right), with selected points and RANSAC inliers shown in the paper's visual analysis.</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="bibtex" class="section bib-section">
+      <div class="container">
+        <div class="section-kicker">BibTeX</div>
+        <div class="bib-box"><button id="copyBib" class="copy-button" type="button">COPY</button><pre id="bibCode"><span class="bib-key">@inproceedings</span><span class="bib-punct">{</span><span class="bib-id">zhao2026saka</span><span class="bib-punct">,</span>
+  <span class="bib-field">title</span>     <span class="bib-punct">=</span> <span class="bib-value">{SAKA: Spatially Aware Keypoint Allocation for Lightweight Image Matching}</span><span class="bib-punct">,</span>
+  <span class="bib-field">author</span>    <span class="bib-punct">=</span> <span class="bib-value">{Zhao, Haoran and Chen, Leyan and Wen, Haokai and Cheng, Wentao}</span><span class="bib-punct">,</span>
+  <span class="bib-field">booktitle</span> <span class="bib-punct">=</span> <span class="bib-value">{International Conference on Vision, Image and Signal Processing (ICVISP)}</span><span class="bib-punct">,</span>
+  <span class="bib-field">year</span>      <span class="bib-punct">=</span> <span class="bib-value">{2026}</span><span class="bib-punct">,</span>
+<span class="bib-punct">}</span></pre><div class="copy-status" role="status" aria-live="polite"></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer container"><span>SAKA: Spatially Aware Keypoint Allocation for Lightweight Image Matching</span><a href="#top">Back to top ↑</a></footer>
+  <dialog id="lightbox"><button class="close-lightbox" type="button" aria-label="Close image">×</button><img alt="Expanded qualitative comparison"></dialog>
+  <script src="script.js"></script>
+</body>
+</html>
